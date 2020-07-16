@@ -148,5 +148,6 @@ std::string Vector3D::ToString() {
 	std::string y = Mathematics::DoubleToCleanString(this->Y);
 	std::string z = Mathematics::DoubleToCleanString(this->Z);
 
-	return "[" + x + ", " + y + ", " + z + "]";
+	//return "[" + x + ", " + y + ", " + z + "]";
+	return x + ", " + y + ", " + z + ",";
 }
