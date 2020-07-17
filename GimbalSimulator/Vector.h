@@ -31,6 +31,19 @@ public:
 	bool IsEqual(Vector3D vector);
 	std::string ToString();
 
+	static Vector3D Max(Vector3D max, Vector3D input) {
+		return Vector3D(input.X > max.X ? input.X : max.X,
+			input.Y > max.Y ? input.Y : max.Y,
+			input.Z > max.Z ? input.Z : max.Z);
+	}
+
+
+	static Vector3D Min(Vector3D min, Vector3D input) {
+		return Vector3D(input.X < min.X ? input.X : min.X,
+			input.Y < min.Y ? input.Y : min.Y,
+			input.Z < min.Z ? input.Z : min.Z);
+	}
+
 	static Vector3D LERP(Vector3D start, Vector3D finish, double ratio) {
 		return finish * ratio + start * (1.0 - ratio);
 	}

@@ -62,3 +62,9 @@ bool Mathematics::IsFinite(double value) {
 int Mathematics::Sign(double value) {
 		return (0 < value) - (value < 0);
 }
+
+double  Mathematics::CosineInterpolate(double start, double end, double ratio) {
+	double ratio2 = (1.0 - cos(ratio * 3.14159265359)) / 2.0;
+
+	return(start * (1.0 - ratio2) + end * ratio2);
+}

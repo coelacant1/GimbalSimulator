@@ -139,21 +139,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Average.h" />
     <ClInclude Include="AxisAngle.h" />
     <ClInclude Include="DirectionAngle.h" />
     <ClInclude Include="EulerAngles.h" />
     <ClInclude Include="EulerConstants.h" />
     <ClInclude Include="EulerOrder.h" />
+    <ClInclude Include="Gimbal.h" />
     <ClInclude Include="KalmanFilter.h" />
     <ClInclude Include="Mathematics.h" />
+    <ClInclude Include="MPU.h" />
+    <ClInclude Include="MPUNoisifier.h" />
+    <ClInclude Include="MPUOS.h" />
+    <ClInclude Include="Noise.h" />
     <ClInclude Include="Quaternion.h" />
     <ClInclude Include="Rotation.h" />
     <ClInclude Include="RotationMatrix.h" />
     <ClInclude Include="Vector.h" />
+    <ClInclude Include="VectorAverage.h" />
     <ClInclude Include="VectorKalmanFilter.h" />
     <ClInclude Include="YawPitchRoll.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Average.cpp" />
     <ClCompile Include="AxisAngle.cpp" />
     <ClCompile Include="DirectionAngle.cpp" />
     <ClCompile Include="EulerAngles.cpp" />
@@ -162,10 +170,14 @@
     <ClCompile Include="KalmanFilter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mathematics.cpp" />
+    <ClCompile Include="MPU.cpp" />
+    <ClCompile Include="MPUNoisifier.cpp" />
+    <ClCompile Include="Noise.cpp" />
     <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="Rotation.cpp" />
     <ClCompile Include="RotationMatrix.cpp" />
     <ClCompile Include="Vector.cpp" />
+    <ClCompile Include="VectorAverage.cpp" />
     <ClCompile Include="VectorKalmanFilter.cpp" />
     <ClCompile Include="YawPitchRoll.cpp" />
   </ItemGroup>
