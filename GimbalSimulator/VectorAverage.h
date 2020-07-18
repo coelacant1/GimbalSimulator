@@ -13,6 +13,7 @@ public:
 	VectorAverage();
 
 	void Add(Vector3D input);
-	Vector3D Calculate();
+	Vector3D CalculateAverage();
+	Vector3D CalculateStdDev();
 
 };

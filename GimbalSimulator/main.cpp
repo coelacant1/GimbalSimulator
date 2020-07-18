@@ -3,16 +3,18 @@
 #include <iostream>
 #include <random>
 #include "VectorKalmanFilter.h"
+#include <vector>
 
 #include "MPU.h"
+#include "MPUCalibrator.h"
 #include "MPUNoisifier.h"
 
-EulerOrder eO = EulerConstants::EulerOrderXYXR;
+EulerOrder eO = EulerConstants::EulerOrderZYZR;
 
 Noise noise = Noise(1);
 
-double gVKF = 0.02;
-double mGKF = 100;
+double gVKF = 0.05;
+double mGKF = 200;
 
 MPUNoisifier mpu1Noise = MPUNoisifier(noise);
 MPUNoisifier mpu2Noise = MPUNoisifier(noise);
@@ -24,7 +26,7 @@ MPU mpu2 = MPU(Vector3D(-0.012, 0.015,  0.010), MPUOS(), gVKF, mGKF);
 MPU mpu3 = MPU(Vector3D(-0.012, 0.015, -0.010), MPUOS(), gVKF, mGKF);
 MPU mpu4 = MPU(Vector3D(-0.012, 0.015, -0.030), MPUOS(), gVKF, mGKF);
 
-MPU mpu1N = MPU(Vector3D(-0.012, 0.015,  0.030), MPUOS(Vector3D(0.09, -0.09, -0.09), Vector3D(), Vector3D(10,10,10), Vector3D()), gVKF, mGKF);
+MPU mpu1N = MPU(Vector3D(-0.012, 0.015,  0.030), mpu1Noise.GetMPUOS(), gVKF, mGKF);
 MPU mpu2N = MPU(Vector3D(-0.012, 0.015,  0.030), mpu2Noise.GetMPUOS(), gVKF, mGKF);
 MPU mpu3N = MPU(Vector3D(-0.012, 0.015, -0.030), mpu3Noise.GetMPUOS(), gVKF, mGKF);
 MPU mpu4N = MPU(Vector3D(-0.012, 0.015, -0.030), mpu4Noise.GetMPUOS(), gVKF, mGKF);
@@ -33,7 +35,7 @@ Quaternion currentRotation = Quaternion(1, 0, 0, 0);
 
 Vector3D currentVectorRotation = Vector3D(0,   0,   0);
 Vector3D startVectorRotation   = Vector3D(0,   0,   0);
-Vector3D endVectorRotation     = Vector3D(789,  -1607,  536);
+Vector3D endVectorRotation     = Vector3D(360,  -180,  90);
 
 Vector3D currentPosition = Vector3D(0, 0, 0);
 Vector3D startPosition = Vector3D(0, 0, 0);
@@ -71,51 +73,45 @@ void main() {
 		Calculate(i, currentPosition.X / endPosition.X, true);
 	}
 
-	mpu1.CalculateAverage();
-	mpu2.CalculateAverage();
-	mpu3.CalculateAverage();
-	mpu4.CalculateAverage();
-	mpu1N.CalculateAverage();
-	mpu2N.CalculateAverage();
-	mpu3N.CalculateAverage();
-	mpu4N.CalculateAverage();
+	MPUOS mpu1C = MPUCalibrator(&mpu1, &mpu1N).Calibrate();
+	MPUOS mpu2C = MPUCalibrator(&mpu2, &mpu2N).Calibrate();
+	MPUOS mpu3C = MPUCalibrator(&mpu3, &mpu3N).Calibrate();
+	MPUOS mpu4C = MPUCalibrator(&mpu4, &mpu4N).Calibrate();
 
-	Vector3D accScalar1 = mpu1.GetAccScalar(mpu1N.GetAccRange());
-	Vector3D accScalar2 = mpu2.GetAccScalar(mpu2N.GetAccRange());
-	Vector3D accScalar3 = mpu3.GetAccScalar(mpu3N.GetAccRange());
-	Vector3D accScalar4 = mpu4.GetAccScalar(mpu4N.GetAccRange());
+	std::cout << std::endl << "Accelerometer Calibration: " << std::endl;
 
-	Vector3D accOffset1 = mpu1.GetAccOffset(accScalar1, mpu1N.GetAccAvg(), mpu1.GetAccAvg());
-	Vector3D accOffset2 = mpu2.GetAccOffset(accScalar2, mpu2N.GetAccAvg(), mpu2.GetAccAvg());
-	Vector3D accOffset3 = mpu3.GetAccOffset(accScalar3, mpu3N.GetAccAvg(), mpu3.GetAccAvg());
-	Vector3D accOffset4 = mpu4.GetAccOffset(accScalar4, mpu4N.GetAccAvg(), mpu4.GetAccAvg());
+	std::cout << mpu1C.AccToString() << std::endl;
+	std::cout << mpu2C.AccToString() << std::endl;
+	std::cout << mpu3C.AccToString() << std::endl;
+	std::cout << mpu4C.AccToString() << std::endl;
 
-	Vector3D accScalarDif1 = mpu1Noise.GetMPUOS().accScalar - accScalar1;
-	Vector3D accScalarDif2 = mpu2Noise.GetMPUOS().accScalar - accScalar2;
-	Vector3D accScalarDif3 = mpu3Noise.GetMPUOS().accScalar - accScalar3;
-	Vector3D accScalarDif4 = mpu4Noise.GetMPUOS().accScalar - accScalar4;
+	std::cout << std::endl << "Gyroscope Calibration: " << std::endl;
+	std::cout << mpu1C.VelToString() << std::endl;
+	std::cout << mpu2C.VelToString() << std::endl;
+	std::cout << mpu3C.VelToString() << std::endl;
+	std::cout << mpu4C.VelToString() << std::endl;
 
-	Vector3D accOffsetDif1 = mpu1Noise.GetMPUOS().accOffset - accOffset1;
-	Vector3D accOffsetDif2 = mpu2Noise.GetMPUOS().accOffset - accOffset2;
-	Vector3D accOffsetDif3 = mpu3Noise.GetMPUOS().accOffset - accOffset3;
-	Vector3D accOffsetDif4 = mpu4Noise.GetMPUOS().accOffset - accOffset4;
+	std::cout << std::endl << "Calibration Verification: " << std::endl;
 
-	std::cout << std::endl;
+	std::cout << MPUOS::Verify(mpu1C, mpu1Noise.GetMPUOS()).AccToString() << std::endl;
+	std::cout << MPUOS::Verify(mpu2C, mpu2Noise.GetMPUOS()).AccToString() << std::endl;
+	std::cout << MPUOS::Verify(mpu3C, mpu3Noise.GetMPUOS()).AccToString() << std::endl;
+	std::cout << MPUOS::Verify(mpu4C, mpu4Noise.GetMPUOS()).AccToString() << std::endl;
 
-	std::cout << accScalar1.ToString() << " " << accOffset1.ToString() << std::endl;
+}
 
-	std::cout << accScalar2.ToString() << " " << mpu2Noise.GetMPUOS().accScalar.ToString() << std::endl;
+void PrintVectors(std::vector<Vector3D> vectors) {
+	for (Vector3D x : vectors) {
+		std::cout << Mathematics::DoubleToCleanString(x.X) << ",";
+	}
 
-	std::cout << std::endl;
+	for (Vector3D x : vectors) {
+		std::cout << Mathematics::DoubleToCleanString(x.Y) << ",";
+	}
 
-	std::cout << accOffset2.ToString() << " " << mpu2Noise.GetMPUOS().accOffset.ToString() << std::endl;
-
-	std::cout << std::endl;
-
-	std::cout << accScalarDif1.Multiply(100).ToString() << " " << accOffsetDif1.Multiply(100).ToString() << std::endl;
-	std::cout << accScalarDif2.Multiply(100).ToString() << " " << accOffsetDif2.Multiply(100).ToString() << std::endl;
-	std::cout << accScalarDif3.Multiply(100).ToString() << " " << accOffsetDif3.Multiply(100).ToString() << std::endl;
-	std::cout << accScalarDif4.Multiply(100).ToString() << " " << accOffsetDif4.Multiply(100).ToString() << std::endl;
+	for (Vector3D x : vectors) {
+		std::cout << Mathematics::DoubleToCleanString(x.Z) << ",";
+	}
 
 	std::cout << std::endl;
 }
@@ -129,38 +125,43 @@ void Calculate(double globalRatio, double motionRatio, bool print) {
 	currentLinearAcceleration = ((currentLinearVelocity - previousLinearVelocity) / timeIncrement) + Vector3D(0, -9.81, 0);//inertial frame
 	currentRotatedAcceleration = currentRotation.RotateVector(currentLinearAcceleration);//rotating frame of reference
 
-	Vector3D mpu1LAcc = mpu1.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation);
-	Vector3D mpu2LAcc = mpu2.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation);
-	Vector3D mpu3LAcc = mpu3.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation);
-	Vector3D mpu4LAcc = mpu4.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation);
 
-	Vector3D mpu1LVel = currentAngularVelocity;
-	Vector3D mpu2LVel = currentAngularVelocity;
-	Vector3D mpu3LVel = currentAngularVelocity;
-	Vector3D mpu4LVel = currentAngularVelocity;
+	Vector3D mpu1LAcc = mpu1.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation); Vector3D mpu1LAccF = mpu1LAcc;
+	Vector3D mpu2LAcc = mpu2.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation); Vector3D mpu2LAccF = mpu2LAcc;
+	Vector3D mpu3LAcc = mpu3.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation); Vector3D mpu3LAccF = mpu3LAcc;
+	Vector3D mpu4LAcc = mpu4.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation); Vector3D mpu4LAccF = mpu4LAcc;
 
-	Vector3D mpu1LAccN = mpu1LAcc;//.Add(noise.RandomizeNormal(2.0));
-	Vector3D mpu2LAccN = mpu2LAcc;//.Add(noise.RandomizeNormal(2.0));
-	Vector3D mpu3LAccN = mpu3LAcc;//.Add(noise.RandomizeNormal(2.0));
-	Vector3D mpu4LAccN = mpu4LAcc;//.Add(noise.RandomizeNormal(2.0));
+	Vector3D mpu1LVel = mpu1.GetLocalAngularVelocity(currentAngularVelocity); Vector3D mpu1LVelF = mpu1LVel;
+	Vector3D mpu2LVel = mpu2.GetLocalAngularVelocity(currentAngularVelocity); Vector3D mpu2LVelF = mpu2LVel;
+	Vector3D mpu3LVel = mpu3.GetLocalAngularVelocity(currentAngularVelocity); Vector3D mpu3LVelF = mpu3LVel;
+	Vector3D mpu4LVel = mpu4.GetLocalAngularVelocity(currentAngularVelocity); Vector3D mpu4LVelF = mpu4LVel;
 
-	Vector3D mpu1LVelN = currentAngularVelocity;// .Add(noise.RandomizeNormal(1.0));
-	Vector3D mpu2LVelN = currentAngularVelocity;//.Add(noise.RandomizeNormal(1.0));
-	Vector3D mpu3LVelN = currentAngularVelocity;// .Add(noise.RandomizeNormal(1.0));
-	Vector3D mpu4LVelN = currentAngularVelocity;// .Add(noise.RandomizeNormal(1.0));
+	Vector3D mpu1LAccN = mpu1N.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation).Add(noise.RandomizeNormal(0.25)); Vector3D mpu1LAccNF = mpu1LAccN;
+	Vector3D mpu2LAccN = mpu2N.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation).Add(noise.RandomizeNormal(0.25)); Vector3D mpu2LAccNF = mpu2LAccN;
+	Vector3D mpu3LAccN = mpu3N.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation).Add(noise.RandomizeNormal(0.25)); Vector3D mpu3LAccNF = mpu3LAccN;
+	Vector3D mpu4LAccN = mpu4N.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation).Add(noise.RandomizeNormal(0.25)); Vector3D mpu4LAccNF = mpu4LAccN;
+
+	Vector3D mpu1LVelN = mpu1N.GetLocalAngularVelocity(currentAngularVelocity).Add(noise.RandomizeNormal(0.05)); Vector3D mpu1LVelNF = mpu1LVelN;
+	Vector3D mpu2LVelN = mpu2N.GetLocalAngularVelocity(currentAngularVelocity).Add(noise.RandomizeNormal(0.05)); Vector3D mpu2LVelNF = mpu2LVelN;
+	Vector3D mpu3LVelN = mpu3N.GetLocalAngularVelocity(currentAngularVelocity).Add(noise.RandomizeNormal(0.05)); Vector3D mpu3LVelNF = mpu3LVelN;
+	Vector3D mpu4LVelN = mpu4N.GetLocalAngularVelocity(currentAngularVelocity).Add(noise.RandomizeNormal(0.05)); Vector3D mpu4LVelNF = mpu4LVelN;
 
 	if (print) {
-		mpu1.UpdateCalibration(mpu1LAcc, mpu1LVel);
-		mpu2.UpdateCalibration(mpu2LAcc, mpu1LVel);
-		mpu3.UpdateCalibration(mpu3LAcc, mpu1LVel);
-		mpu4.UpdateCalibration(mpu4LAcc, mpu1LVel);
+		mpu1.UpdateCalibration(mpu1LAccF, mpu1LVelF);
+		mpu2.UpdateCalibration(mpu2LAccF, mpu1LVelF);
+		mpu3.UpdateCalibration(mpu3LAccF, mpu1LVelF);
+		mpu4.UpdateCalibration(mpu4LAccF, mpu1LVelF);
 
-		mpu1N.UpdateCalibration(mpu1LAccN, mpu1LVelN);
-		mpu2N.UpdateCalibration(mpu2LAccN, mpu2LVelN);
-		mpu3N.UpdateCalibration(mpu3LAccN, mpu3LVelN);
-		mpu4N.UpdateCalibration(mpu4LAccN, mpu4LVelN);
+		mpu1N.UpdateCalibration(mpu1LAccNF, mpu1LVelNF);
+		mpu2N.UpdateCalibration(mpu2LAccNF, mpu2LVelNF);
+		mpu3N.UpdateCalibration(mpu3LAccNF, mpu3LVelNF);
+		mpu4N.UpdateCalibration(mpu4LAccNF, mpu4LVelNF);
 
-		std::cout << Mathematics::DoubleToCleanString(globalRatio) << "," << mpu1LAcc.ToString() << mpu1LAccN.ToString() << currentAngularVelocity.ToString() << std::endl;
+		std::vector<Vector3D> vals = { mpu1LAcc, mpu2LAcc, mpu3LAcc, mpu4LAcc, mpu1LAccN, mpu2LAccN, mpu3LAccN, mpu4LAccN, mpu1LAccF, mpu2LAccF, mpu3LAccF, mpu4LAccF, mpu1LAccNF, mpu2LAccNF, mpu3LAccNF, mpu4LAccNF };
+
+		std::cout << Mathematics::DoubleToCleanString(globalRatio) << ",";
+
+		PrintVectors(vals);
 	}
 
 	previousRotation = currentRotation;

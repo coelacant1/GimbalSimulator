@@ -12,10 +12,18 @@ void VectorAverage::Add(Vector3D input) {
 	Z.Add(input.Z);
 }
 
-Vector3D VectorAverage::Calculate() {
+Vector3D VectorAverage::CalculateAverage() {
 	return Vector3D{
-		X.Calculate(),
-		Y.Calculate(),
-		Z.Calculate()
+		X.CalculateAverage(),
+		Y.CalculateAverage(),
+		Z.CalculateAverage()
+	};
+}
+
+Vector3D VectorAverage::CalculateStdDev() {
+	return Vector3D{
+		X.CalculateStdDev(),
+		Y.CalculateStdDev(),
+		Z.CalculateStdDev()
 	};
 }

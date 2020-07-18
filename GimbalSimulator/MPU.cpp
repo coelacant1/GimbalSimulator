@@ -18,13 +18,16 @@ Vector3D MPU::GetLocalAcceleration(Vector3D gimbalLinearVelocity, Vector3D gimba
 
 	eulerAcceleration = gimbalAngularAcceleration.CrossProduct(rotation.RotateVector(offset)) * (-1.0 * proofMass);
 
-	return rotation.RotateVector(gimbalLinearAcceleration) + centrifugalAcceleration + coriolisAcceleration + eulerAcceleration;
+	Vector3D localAcceleration = rotation.RotateVector(gimbalLinearAcceleration) + centrifugalAcceleration + coriolisAcceleration + eulerAcceleration;
+
+	return localAcceleration * mpuOS.accScalar + mpuOS.accOffset;
+}
+
+Vector3D MPU::GetLocalAngularVelocity(Vector3D localAngularVelocity) {
+	return localAngularVelocity * mpuOS.velScalar + mpuOS.velOffset;
 }
 
 void MPU::UpdateCalibration(Vector3D &localAcceleration, Vector3D &localAngularVelocity) {
-	localAcceleration = (localAcceleration + mpuOS.accOffset) * mpuOS.accScalar;
-	localAngularVelocity = (localAngularVelocity + mpuOS.velOffset) * mpuOS.velScalar;
-
 	localAcceleration = accKF.Filter(localAcceleration);
 	localAngularVelocity = velKF.Filter(localAngularVelocity);
 
@@ -37,9 +40,19 @@ void MPU::UpdateCalibration(Vector3D &localAcceleration, Vector3D &localAngularV
 	velAvg.Add(localAngularVelocity);
 }
 
-void MPU::CalculateAverage() {
-	accAvgValue = accAvg.Calculate();
-	velAvgValue = velAvg.Calculate();
+void MPU::Calculate() {
+	accAvgValue = accAvg.CalculateAverage();
+	velAvgValue = velAvg.CalculateAverage();
+	accStdDevValue = accAvg.CalculateStdDev();
+	velStdDevValue = velAvg.CalculateStdDev();
+}
+
+Vector3D MPU::GetAccStdDev() {
+	return accStdDevValue;
+}
+
+Vector3D MPU::GetVelStdDev() {
+	return velStdDevValue;
 }
 
 Vector3D MPU::GetAccAvg() {
@@ -56,20 +69,4 @@ Vector3D MPU::GetAccRange() {
 
 Vector3D MPU::GetVelRange() {
 	return velMax - velMin;
-}
-
-Vector3D MPU::GetAccScalar(Vector3D sourceRange) {
-	return sourceRange / (accMax - accMin);
-}
-
-Vector3D MPU::GetVelScalar(Vector3D sourceRange) {
-	return sourceRange / (velMax - velMin);
-}
-
-Vector3D MPU::GetAccOffset(Vector3D targetScale, Vector3D sourceAvg, Vector3D targetAvg) {
-	return (sourceAvg / targetScale) - targetAvg;
-}
-
-Vector3D MPU::GetVelOffset(Vector3D targetScale, Vector3D sourceAvg, Vector3D targetAvg) {
-	return (sourceAvg / targetScale) - targetAvg;
 }

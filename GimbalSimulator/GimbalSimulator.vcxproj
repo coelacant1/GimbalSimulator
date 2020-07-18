@@ -149,6 +149,7 @@
     <ClInclude Include="KalmanFilter.h" />
     <ClInclude Include="Mathematics.h" />
     <ClInclude Include="MPU.h" />
+    <ClInclude Include="MPUCalibrator.h" />
     <ClInclude Include="MPUNoisifier.h" />
     <ClInclude Include="MPUOS.h" />
     <ClInclude Include="Noise.h" />
@@ -171,6 +172,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mathematics.cpp" />
     <ClCompile Include="MPU.cpp" />
+    <ClCompile Include="MPUCalibrator.cpp" />
     <ClCompile Include="MPUNoisifier.cpp" />
     <ClCompile Include="Noise.cpp" />
     <ClCompile Include="Quaternion.cpp" />

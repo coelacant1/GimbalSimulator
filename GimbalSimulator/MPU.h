@@ -21,6 +21,8 @@ private:
 
 	Vector3D accAvgValue;
 	Vector3D velAvgValue;
+	Vector3D accStdDevValue;
+	Vector3D velStdDevValue;
 
 	VectorAverage accAvg = VectorAverage();
 	VectorAverage velAvg = VectorAverage();
@@ -36,16 +38,15 @@ public:
 	MPU(Vector3D offset, MPUOS mpuOS, double gVKF, double mGKF, double proofMass = 0.000001);
 
 	Vector3D GetLocalAcceleration(Vector3D gimbalLinearVelocity, Vector3D gimbalLinearAcceleration, Vector3D gimbalAngularVelocity, Vector3D gimbalAngularAcceleration, Quaternion rotation);
+	Vector3D GetLocalAngularVelocity(Vector3D localAngularVelocity);
 
 	void UpdateCalibration(Vector3D &localAcceleration, Vector3D &localAngularVelocity);
-	void CalculateAverage();
+	void Calculate();
 
 	Vector3D GetAccAvg();
 	Vector3D GetVelAvg();
+	Vector3D GetAccStdDev();
+	Vector3D GetVelStdDev();
 	Vector3D GetAccRange();
 	Vector3D GetVelRange();
-	Vector3D GetAccScalar(Vector3D sourceRange);
-	Vector3D GetVelScalar(Vector3D sourceRange);
-	Vector3D GetAccOffset(Vector3D targetScale, Vector3D sourceAvg, Vector3D targetAvg);
-	Vector3D GetVelOffset(Vector3D targetScale, Vector3D sourceAvg, Vector3D targetAvg);
 };

@@ -9,6 +9,7 @@ private:
 public:
 	Average();
 	void Add(double value);
-	double Calculate();
+	double CalculateAverage();
+	double CalculateStdDev();
 
 };
