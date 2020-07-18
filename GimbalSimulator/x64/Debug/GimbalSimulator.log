@@ -1,3 +1,5 @@
-﻿  main.cpp
-C:\Users\Steven\Documents\GitHub\GimbalSimulator\GimbalSimulator\main.cpp(63,13): warning C4326: return type of 'main' should be 'int' instead of 'void'
+﻿  MPUNoisifier.cpp
+  main.cpp
+C:\Users\Steven\Documents\GitHub\GimbalSimulator\GimbalSimulator\main.cpp(65,13): warning C4326: return type of 'main' should be 'int' instead of 'void'
+  Generating Code...
   GimbalSimulator.vcxproj -> C:\Users\Steven\Documents\GitHub\GimbalSimulator\x64\Debug\GimbalSimulator.exe

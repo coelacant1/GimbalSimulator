@@ -9,6 +9,8 @@
 #include "MPUCalibrator.h"
 #include "MPUNoisifier.h"
 
+//MPUNOISIFIER
+
 EulerOrder eO = EulerConstants::EulerOrderZYZR;
 
 Noise noise = Noise(1);
@@ -35,7 +37,7 @@ Quaternion currentRotation = Quaternion(1, 0, 0, 0);
 
 Vector3D currentVectorRotation = Vector3D(0,   0,   0);
 Vector3D startVectorRotation   = Vector3D(0,   0,   0);
-Vector3D endVectorRotation     = Vector3D(360,  -180,  90);
+Vector3D endVectorRotation = Vector3D(360,  -180,  90);
 
 Vector3D currentPosition = Vector3D(0, 0, 0);
 Vector3D startPosition = Vector3D(0, 0, 0);
@@ -136,10 +138,10 @@ void Calculate(double globalRatio, double motionRatio, bool print) {
 	Vector3D mpu3LVel = mpu3.GetLocalAngularVelocity(currentAngularVelocity); Vector3D mpu3LVelF = mpu3LVel;
 	Vector3D mpu4LVel = mpu4.GetLocalAngularVelocity(currentAngularVelocity); Vector3D mpu4LVelF = mpu4LVel;
 
-	Vector3D mpu1LAccN = mpu1N.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation).Add(noise.RandomizeNormal(0.25)); Vector3D mpu1LAccNF = mpu1LAccN;
-	Vector3D mpu2LAccN = mpu2N.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation).Add(noise.RandomizeNormal(0.25)); Vector3D mpu2LAccNF = mpu2LAccN;
-	Vector3D mpu3LAccN = mpu3N.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation).Add(noise.RandomizeNormal(0.25)); Vector3D mpu3LAccNF = mpu3LAccN;
-	Vector3D mpu4LAccN = mpu4N.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation).Add(noise.RandomizeNormal(0.25)); Vector3D mpu4LAccNF = mpu4LAccN;
+	Vector3D mpu1LAccN = mpu1N.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation).Add(noise.RandomizeNormal(0.05)); Vector3D mpu1LAccNF = mpu1LAccN;//0.25 simulated, real
+	Vector3D mpu2LAccN = mpu2N.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation).Add(noise.RandomizeNormal(0.05)); Vector3D mpu2LAccNF = mpu2LAccN;//0.25 simulated, real
+	Vector3D mpu3LAccN = mpu3N.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation).Add(noise.RandomizeNormal(0.05)); Vector3D mpu3LAccNF = mpu3LAccN;//0.25 simulated, real
+	Vector3D mpu4LAccN = mpu4N.GetLocalAcceleration(currentLinearVelocity, currentLinearAcceleration, currentAngularVelocity, currentAngularAcceleration, currentRotation).Add(noise.RandomizeNormal(0.05)); Vector3D mpu4LAccNF = mpu4LAccN;//0.25 simulated, real
 
 	Vector3D mpu1LVelN = mpu1N.GetLocalAngularVelocity(currentAngularVelocity).Add(noise.RandomizeNormal(0.05)); Vector3D mpu1LVelNF = mpu1LVelN;
 	Vector3D mpu2LVelN = mpu2N.GetLocalAngularVelocity(currentAngularVelocity).Add(noise.RandomizeNormal(0.05)); Vector3D mpu2LVelNF = mpu2LVelN;
